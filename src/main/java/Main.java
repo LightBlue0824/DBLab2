@@ -4,11 +4,7 @@ import org.hibernate.Transaction;
 import org.hibernate.HibernateException;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.query.Query;
-import pojo.LogEntity;
-import pojo.SchemeEntity;
-import pojo.UserEntity;
-import pojo.UserschemeEntity;
-import sun.rmi.runtime.Log;
+import pojo.*;
 
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
@@ -18,6 +14,7 @@ import java.util.List;
 
 public class Main {
     private static SessionFactory sessionFactory;
+    private SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     public static void main(String[] args){
         try{
@@ -31,9 +28,27 @@ public class Main {
 //        main.updateUserBalance(1, 1);
 //        main.addUserScheme(1,1, 100, 0, 0, 0);
 //        main.orderScheme(1,1);
+//        main.orderScheme(1,2);
+//        main.orderScheme(1,3);
+//        main.orderScheme(1,4);
         main.queryUserScheme(1);
 //        main.queryOrderHistory(1);
-//        main.addCost(1, "通话", 2, "南京");
+//        main.makeCost(1, "通话", 2, "南京");
+//        main.makeCost(1, "通话", 105, "南京");
+//        main.makeCost(1, "短信", 3, "杭州");
+//        main.makeCost(1, "短信", 203, "南京");
+//        main.makeCost(1, "流量", 20, "南京");
+//        main.makeCost(1, "流量", 20, "北京");
+//        main.makeCost(1, "流量", 2500, "南京");
+//        main.makeCost(1, "流量", 4100, "南京");
+//        main.queryCost(1, "全部");
+//        main.queryCost(1, "通话");
+//        main.queryCost(1, "短信");
+//        main.queryCost(1, "流量");
+        main.cancelScheme(1,1,"立即生效");
+//        main.cancelScheme(1,1,"次月生效");
+        main.queryUserScheme(1);
+                main.queryOrderHistory(1);
     }
 
     /**
@@ -42,10 +57,58 @@ public class Main {
      * @param sid 套餐ID
      */
     public void orderScheme(int uid, int sid){
+        //判断是否重复订购同一套餐
+        String hql = "FROM UserschemeEntity WHERE uid="+uid+" AND sid="+sid;
+        Session session = sessionFactory.openSession();
+        Query query = session.createQuery(hql);
+        List results = query.list();
+        session.close();
+
+        if(results.size() > 0){
+            System.out.println("已订购过套餐"+sid);
+            return;
+        }
+
         SchemeEntity scheme = getScheme(sid);       //获取套餐详情
         addUserScheme(uid, scheme.getSid(), scheme.getPhonecall(), scheme.getMessage(), scheme.getLocal(), scheme.getDomestic());       //新增用户订购的套餐
-        addLog(uid, "订购", sid, "");
-        System.out.println("用户"+uid+"\t订购套餐"+sid+"\t"+scheme.getSname());
+
+        Timestamp time = new Timestamp(new Date().getTime());
+        addLog(time, uid, "订购", sid, "");
+        updateUserBalance(uid, scheme.getCost());               //更新用户余额
+
+        System.out.println(df.format(time)+"\t用户"+uid+"\t订购\t套餐"+sid+"\t"+scheme.getSname());
+    }
+
+    /**
+     * 用户退订套餐
+     * @param uid 用户ID
+     * @param sid 套餐ID
+     * @param mode 退订模式{立即生效，次月生效}
+     */
+    public void cancelScheme(int uid, int sid, String mode){
+        //判断是否订购了这一套餐
+        String hql = "FROM UserschemeEntity WHERE uid="+uid+" AND sid="+sid;
+        Session session = sessionFactory.openSession();
+        Query query = session.createQuery(hql);
+        List<UserschemeEntity> results = query.list();
+
+        if(results.size() == 0){
+            System.out.println("用户"+sid+"未订购套餐"+sid);
+            return;
+        }
+
+        if(mode.equals("立即生效")){
+            //如果已订购该套餐，size肯定为1
+            deleteUserScheme(uid, sid);
+        }
+        session.close();
+
+        SchemeEntity scheme = getScheme(sid);       //获取套餐详情
+
+        Timestamp time = new Timestamp(new Date().getTime());
+        addLog(time, uid, "退订", sid, mode);
+
+        System.out.println(df.format(time)+"\t用户"+uid+"\t退订\t套餐"+sid+"\t"+scheme.getSname()+"\t"+mode);
     }
 
     /**
@@ -54,7 +117,11 @@ public class Main {
      */
     public void queryUserScheme(int uid){
         String hql = "FROM UserschemeEntity WHERE uid="+uid;        //查询该用户订购的套餐
-        List<UserschemeEntity> results = query(hql);
+        Session session = sessionFactory.openSession();
+        Query query = session.createQuery(hql);
+        List<UserschemeEntity> results = query.list();
+        session.close();
+
         System.out.println("查询套餐余额：");
         for(int i = 0; i < results.size(); i++){
             UserschemeEntity tempUs = results.get(i);
@@ -68,14 +135,17 @@ public class Main {
      * @param uid 用户ID
      */
     public void queryOrderHistory(int uid){
-        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String hql = "FROM LogEntity WHERE uid="+uid;
-        List<LogEntity> results = query(hql);
+        Session session = sessionFactory.openSession();
+        Query query = session.createQuery(hql);
+        List<LogEntity> results = query.list();
+        session.close();
+
         System.out.println("查询套餐历史：");
         for(int i = 0; i < results.size(); i++){
             LogEntity tempLog = results.get(i);
             SchemeEntity scheme = getScheme(tempLog.getSid());
-            System.out.println("时间："+df.format(tempLog.getTime())+"\t"+tempLog.getOperation()+"\t套餐"+tempLog.getSid()+"\t"+scheme.getSname()+"\t"+tempLog.getMode());
+            System.out.println(df.format(tempLog.getTime())+"\t"+tempLog.getOperation()+"\t套餐"+tempLog.getSid()+"\t"+scheme.getSname()+"\t"+tempLog.getMode());
         }
     }
 
@@ -86,7 +156,7 @@ public class Main {
      * @param used 使用多少
      * @param city 消费时所在城市
      */
-    public void addCost(int uid, String type, double used, String city){
+    public void makeCost(int uid, String type, double used, String city){
         if(!type.equals("通话") && !type.equals("短信") && !type.equals("流量")){
             return;
         }
@@ -107,8 +177,11 @@ public class Main {
                 type = "国内流量";
             }
         }
-        String hql = "FROM UserschemeEntiry WHERE uid="+uid;        //查询该用户订购的套餐
-        List<UserschemeEntity> userScheme = query(hql);
+        String hql = "FROM UserschemeEntity WHERE uid="+uid;        //查询该用户订购的套餐
+        Session session = sessionFactory.openSession();
+        Query query = session.createQuery(hql);
+        List<UserschemeEntity> userScheme = query.list();
+        session.close();
 
         for(int i = 0; i < userScheme.size(); i++){         //在有剩余的套餐中扣除使用量
             UserschemeEntity tempUs = userScheme.get(i);
@@ -203,9 +276,36 @@ public class Main {
             }
         }
 
-        Timestamp time = new Timestamp(new Date().getTime());
+        //更新用户套餐余额
+        for(int i = 0; i < userScheme.size(); i++){
+            updateUserScheme(userScheme.get(i));
+        }
 
-        System.out.println("消费"+"时间："+"\t类型："+type+"\t使用量"+used+"\t实际消费"+realCost);
+        Timestamp time = new Timestamp(new Date().getTime());
+        addCost(time, uid, type, inScheme, outScheme, realCost);
+        System.out.println("消费\t"+df.format(time)+"\t类型："+type+"\t套餐内使用量"+inScheme+"\t套餐外使用量"+outScheme+"\t实际消费"+realCost);
+    }
+
+    /**
+     * 查询用户的消费情况
+     * @param uid uid
+     */
+    public void queryCost(int uid, String type){
+        String hql = "FROM CostEntity WHERE uid="+uid;
+        if(!type.equals("全部")){
+            hql += " AND type LIKE '%"+type+"'";
+        }
+        Session session = sessionFactory.openSession();
+        Query query = session.createQuery(hql);
+        List<CostEntity> results = query.list();
+        session.close();
+
+        System.out.println("查询用户消费情况："+type);
+        for(int i = 0; i < results.size(); i++){
+            CostEntity tempCost = results.get(i);
+            System.out.println(df.format(tempCost.getTime())+"\t类型："+tempCost.getType()+"\t套餐内使用量"+tempCost.getInScheme()
+                    +"\t套餐外使用量"+tempCost.getOutScheme()+"\t实际消费"+tempCost.getRealcost());
+        }
     }
 
     /**
@@ -254,6 +354,12 @@ public class Main {
 
     /**
      * 添加用户套餐
+     * @param uid uid
+     * @param sid sid
+     * @param phonecall phonecall
+     * @param message message
+     * @param local local
+     * @param domestic domestic
      */
     public void addUserScheme(int uid, int sid, int phonecall, int message, double local, double domestic){
         Session session = sessionFactory.openSession();
@@ -272,14 +378,39 @@ public class Main {
     }
 
     /**
+     * 删除用户订购的套餐
+     * @param uid uid
+     * @param sid sid
+     */
+    public void deleteUserScheme(int uid, int sid){
+        Session session = sessionFactory.openSession();
+        Transaction tx = null;
+        try{
+            tx = session.beginTransaction();
+            String hql = "DELETE FROM UserschemeEntity WHERE uid="+uid+" AND sid="+sid;
+            Query query = session.createQuery(hql);
+            query.executeUpdate();
+//            int affected = query.executeUpdate();
+//            System.out.println(affected+"rows");
+            tx.commit();
+        }catch (HibernateException e) {
+            if (tx!=null) tx.rollback();
+            e.printStackTrace();
+        }finally {
+            session.close();
+        }
+    }
+
+    /**
      * 更新用户套餐的剩余
+     * @param us 要更新的实体
      */
     public void updateUserScheme(UserschemeEntity us){
         Session session = sessionFactory.openSession();
         Transaction tx = null;
         try{
             tx = session.beginTransaction();
-            session.save(us);
+            session.update(us);
             tx.commit();
         }catch (HibernateException e) {
             if (tx!=null) tx.rollback();
@@ -314,15 +445,44 @@ public class Main {
 
     /**
      * 添加一条操作记录
+     * @param time time
+     * @param uid uid
+     * @param operation operation
+     * @param sid sid
+     * @param mode mode
      */
-    public void addLog(int uid, String operation, int sid, String mode){
+    public void addLog(Timestamp time, int uid, String operation, int sid, String mode){
         Session session = sessionFactory.openSession();
         Transaction tx = null;
         try{
             tx = session.beginTransaction();
-            Timestamp time = new Timestamp(new Date().getTime());
             LogEntity log = new LogEntity(time, uid, operation, sid, mode);
             session.save(log);
+            tx.commit();
+        }catch (HibernateException e) {
+            if (tx!=null) tx.rollback();
+            e.printStackTrace();
+        }finally {
+            session.close();
+        }
+    }
+
+    /**
+     * 添加一条操作记录
+     * @param time time
+     * @param uid uid
+     * @param type type
+     * @param inScheme 套餐内使用
+     * @param outScheme 套餐外使用
+     * @param realCost 实际消费
+     */
+    public void addCost(Timestamp time, int uid, String type, double inScheme, double outScheme, double realCost){
+        Session session = sessionFactory.openSession();
+        Transaction tx = null;
+        try{
+            tx = session.beginTransaction();
+            CostEntity cost = new CostEntity(time, uid, type, inScheme, outScheme, realCost);
+            session.save(cost);
             tx.commit();
         }catch (HibernateException e) {
             if (tx!=null) tx.rollback();

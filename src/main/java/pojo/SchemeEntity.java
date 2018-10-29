@@ -11,16 +11,9 @@ public class SchemeEntity {
     private int message;
     private double local;
     private double domestic;
+    private int cost;
 
     public SchemeEntity() {
-    }
-
-    public SchemeEntity(String sname, int phonecall, int message, double local, double domestic) {
-        this.sname = sname;
-        this.phonecall = phonecall;
-        this.message = message;
-        this.local = local;
-        this.domestic = domestic;
     }
 
     @Id
@@ -113,5 +106,15 @@ public class SchemeEntity {
         temp = Double.doubleToLongBits(domestic);
         result = 31 * result + (int) (temp ^ (temp >>> 32));
         return result;
+    }
+
+    @Basic
+    @Column(name = "cost")
+    public int getCost() {
+        return cost;
+    }
+
+    public void setCost(int cost) {
+        this.cost = cost;
     }
 }

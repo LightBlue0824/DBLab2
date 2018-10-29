@@ -18,8 +18,7 @@ public class CostEntity {
 
     }
 
-    public CostEntity(int cid, Timestamp time, int uid, String type, double inScheme, double outScheme, double realcost) {
-        this.cid = cid;
+    public CostEntity(Timestamp time, int uid, String type, double inScheme, double outScheme, double realcost) {
         this.time = time;
         this.uid = uid;
         this.type = type;
