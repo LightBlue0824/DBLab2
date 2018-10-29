@@ -1,0 +1,29 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE hibernate-configuration PUBLIC
+    "-//Hibernate/Hibernate Configuration DTD//EN"
+    "http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
+<hibernate-configuration>
+  <session-factory>
+    <property name="connection.useUnicode">true</property>
+    <property name="connection.characterEncoding">UTF-8</property>
+    <property name="connection.url">jdbc:mysql://localhost:3306/dblab2</property>
+    <property name="connection.driver_class">com.mysql.jdbc.Driver</property>
+    <!--数据库用户名  -->
+    <property name="connection.username">root</property>
+    <!--数据库密码  -->
+    <property name="connection.password">123456</property>
+
+    <!--方言，便于hibernate对象操作转化为合适的数据库语句  -->
+    <property name="dialect">org.hibernate.dialect.MySQLDialect</property>
+
+    <mapping class="pojo.CostEntity"/>
+    <mapping class="pojo.LogEntity"/>
+    <mapping class="pojo.SchemeEntity"/>
+    <mapping class="pojo.UserEntity"/>
+    <mapping class="pojo.UserschemeEntity"/>
+    <mapping class="pojo.CostEntity"/>
+
+    <!-- DB schema will be updated if needed -->
+    <!-- <property name="hbm2ddl.auto">update</property> -->
+  </session-factory>
+</hibernate-configuration>
