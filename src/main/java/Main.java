@@ -31,6 +31,8 @@ public class Main {
 //        main.orderScheme(1,2);
 //        main.orderScheme(1,3);
 //        main.orderScheme(1,4);
+//        main.orderScheme(1,5);
+//        main.orderScheme(1,6);
         main.queryUserScheme(1);
 //        main.queryOrderHistory(1);
 //        main.makeCost(1, "通话", 2, "南京");
@@ -45,10 +47,10 @@ public class Main {
 //        main.queryCost(1, "通话");
 //        main.queryCost(1, "短信");
 //        main.queryCost(1, "流量");
-        main.cancelScheme(1,1,"立即生效");
+//        main.cancelScheme(1,1,"立即生效");
 //        main.cancelScheme(1,1,"次月生效");
-        main.queryUserScheme(1);
-                main.queryOrderHistory(1);
+//        main.queryUserScheme(1);
+        main.queryMonthBill(1);
     }
 
     /**
@@ -74,7 +76,7 @@ public class Main {
 
         Timestamp time = new Timestamp(new Date().getTime());
         addLog(time, uid, "订购", sid, "");
-        updateUserBalance(uid, scheme.getCost());               //更新用户余额
+        updateUserBalance(uid, -scheme.getCost());               //更新用户余额
 
         System.out.println(df.format(time)+"\t用户"+uid+"\t订购\t套餐"+sid+"\t"+scheme.getSname());
     }
@@ -307,6 +309,81 @@ public class Main {
                     +"\t套餐外使用量"+tempCost.getOutScheme()+"\t实际消费"+tempCost.getRealcost());
         }
     }
+
+    /**
+     * 查询用户当前月的账单
+     * @param uid uid
+     */
+    public void queryMonthBill(int uid){
+        Session session = sessionFactory.openSession();
+        String hql;
+        Query query;
+
+        //余额
+        UserEntity user = getUser(uid);
+        double balance = user.getBalance();
+
+        //套餐月费
+        hql = "SELECT us.uid, SUM(s.cost) FROM UserschemeEntity AS us, SchemeEntity AS s WHERE us.sid = s.sid AND us.uid="+uid+" GROUP BY us.uid";        //查询该用户订购的套餐
+        query = session.createQuery(hql);
+        List<Object[]> results_schemeCost = query.list();
+        int schemeCost = 0;
+        if(results_schemeCost.get(0)[0] != null){
+            schemeCost = ((Long) results_schemeCost.get(0)[1]).intValue();
+        }
+
+
+        //套餐外消费
+        hql = "SELECT uid, SUM(realcost) FROM CostEntity WHERE uid="+uid;
+        query = session.createQuery(hql);
+        List<Object[]> results_outScheme = query.list();
+        double outSchemeCost = 0;
+        if(results_outScheme.get(0)[0] != null){
+            outSchemeCost = (Double) results_outScheme.get(0)[1];
+        }
+
+
+        //通话
+        hql = "SELECT uid, SUM(inScheme), SUM(outScheme) FROM CostEntity WHERE type = '通话' AND uid="+uid;
+        query = session.createQuery(hql);
+        List<Object[]> results_phonecall = query.list();
+        double phonecallSum = 0;
+        if(results_phonecall.get(0)[0] != null){
+            phonecallSum = (Double) results_phonecall.get(0)[1] + (Double) results_phonecall.get(0)[2];
+        }
+
+        //短信
+        hql = "SELECT uid, SUM(inScheme), SUM(outScheme) FROM CostEntity WHERE type = '短信' AND uid="+uid;
+        query = session.createQuery(hql);
+        List<Object[]> results_message = query.list();
+        double messageSum = 0;
+        if(results_message.get(0)[0] != null){
+            messageSum = (Double) results_message.get(0)[1] + (Double) results_message.get(0)[2];
+        }
+
+        //本地流量
+        hql = "SELECT uid, SUM(inScheme), SUM(outScheme) FROM CostEntity WHERE type = '本地流量' AND uid="+uid;
+        query = session.createQuery(hql);
+        List<Object[]> results_local = query.list();
+        double localSum = 0;
+        if(results_local.get(0)[0] != null){
+            localSum = (Double) results_local.get(0)[1] + (Double) results_local.get(0)[2];
+        }
+
+        //国内流量
+        hql = "SELECT uid, SUM(inScheme), SUM(outScheme) FROM CostEntity WHERE type = '国内流量' AND uid="+uid;
+        query = session.createQuery(hql);
+        List<Object[]> results_domestic = query.list();
+        double domesticSum = 0;
+        if(results_domestic.get(0)[0] != null){
+            domesticSum = (Double) results_domestic.get(0)[1] + (Double) results_domestic.get(0)[2];
+        }
+
+        System.out.println("查询本月账单：");
+        System.out.println("余额："+balance+"元\t总消费："+(schemeCost+outSchemeCost)+"元\t套餐月费："+schemeCost +"元\t套餐外消费："+outSchemeCost
+                +"元\t通话"+phonecallSum+"分钟\t短信"+messageSum+"条\t本地流量"+localSum+"M\t国内流量"+domesticSum+"M");
+    }
+
 
     /**
      * 更新用户余额
