@@ -25,73 +25,75 @@ public class Main {
         }
         Main main = new Main();
 
-//        //订购套餐
-//        main.orderScheme(1,1);
-//        main.orderScheme(1,2);
-//        main.orderScheme(1,3);
-//        main.orderScheme(1,4);
-//        main.queryUserScheme(1);
-//        main.orderScheme(2,1);
-//        main.orderScheme(2, 5);
-//        main.queryUserScheme(2);
-//        main.orderScheme(3, 3);
-//        main.orderScheme(3, 6);
-//        main.queryUserScheme(3);
-//        //订购、退订、查看历史
-//        main.orderScheme(4,1);
-//        main.cancelScheme(4,1, "立即生效");
-//        main.orderScheme(4,1);
-//        main.cancelScheme(4,1, "次月生效");
-//        main.orderScheme(4,1);
-//        main.queryOrderHistory(4);
-//
-//        //通话资费生成
-//        main.queryUserScheme(1);
-//        main.makeCost(1,"拨打", 5, "南京");
-//        main.makeCost(1, "接听", 4, "杭州");
-//        main.queryCost(1, "通话");
-//        main.queryUserScheme(1);
-//        //通话（套餐+套餐）
-//        main.queryUserScheme(2);
-//        main.makeCost(2, "拨打", 150, "南京");
-//        main.queryUserScheme(2);
-//        //通话（套餐+超出）
-//        main.makeCost(2, "拨打", 150, "南京");
-//
-//        //短信资费生成
-//        main.queryUserScheme(1);
-//        main.makeCost(1, "短信", 3, "北京");
-//        main.queryCost(1, "短信");
-//        main.queryUserScheme(1);
-//
-//        //流量资费生成
-//        main.queryUserScheme(1);
-//        main.makeCost(1, "流量", 200, "南京");  //用户1所属地南京
-//        main.makeCost(1, "流量", 100, "北京");
-//        main.queryUserScheme(1);
-//        //流量（套餐+套餐）
-//        main.queryUserScheme(3);
-//        main.makeCost(3, "流量", 2200, "南京");
-//        main.queryUserScheme(3);
-//        //流量（本地超出+国内补齐）
-//        main.queryUserScheme(3);
-//        main.makeCost(3, "流量", 2100, "南京");
-//        main.queryUserScheme(3);
-//        //流量（套餐外）
-//        main.queryUserScheme(4);
-//        main.makeCost(4, "流量", 5, "上海");    //用户4所属地上海
-//        main.makeCost(4, "流量", 6, "杭州");    //国内超出
-//
-//        //账单生成
+        //订购套餐
+        main.orderScheme(1,1);
+        main.orderScheme(1,2);
+        main.orderScheme(1,3);
+        main.orderScheme(1,4);
+        main.queryUserScheme(1);
+        main.orderScheme(2,1);
+        main.orderScheme(2, 5);
+        main.queryUserScheme(2);
+        main.orderScheme(3, 3);
+        main.orderScheme(3, 6);
+        main.queryUserScheme(3);
+        //订购、退订、查看历史
+        main.orderScheme(4,1);
+        main.cancelScheme(4,1, "立即生效");
+        main.orderScheme(4,1);
+        main.cancelScheme(4,1, "次月生效");
+        main.orderScheme(4,1);
+        main.queryOrderHistory(4);
+
+        //通话资费生成
+        main.queryUserScheme(1);
+        main.makeCost(1,"拨打", 5, "南京");
+        main.makeCost(1, "接听", 4, "杭州");
+        main.queryCost(1, "通话");
+        main.queryUserScheme(1);
+        //通话（套餐+套餐）
+        main.queryUserScheme(2);
+        main.makeCost(2, "拨打", 150, "南京");
+        main.queryUserScheme(2);
+        //通话（套餐+超出）
+        main.makeCost(2, "拨打", 150, "南京");
+
+        //短信资费生成
+        main.queryUserScheme(1);
+        main.makeCost(1, "短信", 3, "北京");
+        main.queryCost(1, "短信");
+        main.queryUserScheme(1);
+
+        //流量资费生成
+        main.queryUserScheme(1);
+        main.makeCost(1, "流量", 200, "南京");  //用户1所属地南京
+        main.makeCost(1, "流量", 100, "北京");
+        main.queryUserScheme(1);
+        //流量（套餐+套餐）
+        main.queryUserScheme(3);
+        main.makeCost(3, "流量", 2200, "南京");
+        main.queryUserScheme(3);
+        //流量（本地超出+国内补齐）
+        main.queryUserScheme(3);
+        main.makeCost(3, "流量", 2100, "南京");
+        main.queryUserScheme(3);
+        //流量（套餐外）
+        main.queryUserScheme(4);
+        main.makeCost(4, "流量", 5, "上海");    //用户4所属地上海
+        main.makeCost(4, "流量", 6, "杭州");    //国内超出
+
+        //账单生成
         main.queryMonthBill(1);
         main.queryMonthBill(2);
         main.queryMonthBill(3);
         main.queryMonthBill(4);
 
         //月初，模拟月初时，进行统一处理，如何判断已到月初不做实现(测试不太可行)，这里模拟已到月初
-//        main.queryUserScheme(1);
-//        main.monthBegin();      //该方法的前提为时间到了月初
-//        main.queryUserScheme(1);
+        main.queryUserScheme(1);
+        main.queryUserScheme(4);
+        main.monthBegin();      //该方法的前提为时间到了月初
+        main.queryUserScheme(4);
+        main.queryUserScheme(4);
 
 //        main.queryOrderHistory(1);
 //        main.makeCost(1, "通话", 2, "南京");
@@ -466,6 +468,7 @@ public class Main {
     /**
      * 查询用户的消费情况
      * @param uid uid
+     * @param type 类型：{全部，通话，拨打，接听，短信，流量}
      */
     public void queryCost(int uid, String type){
         long time1 = System.currentTimeMillis();
