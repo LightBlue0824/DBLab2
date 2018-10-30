@@ -83,10 +83,10 @@ public class Main {
 //        main.makeCost(4, "流量", 6, "杭州");    //国内超出
 //
 //        //账单生成
-//        main.queryMonthBill(1);
-//        main.queryMonthBill(2);
-//        main.queryMonthBill(3);
-//        main.queryMonthBill(4);
+        main.queryMonthBill(1);
+        main.queryMonthBill(2);
+        main.queryMonthBill(3);
+        main.queryMonthBill(4);
 
         //月初，模拟月初时，进行统一处理，如何判断已到月初不做实现(测试不太可行)，这里模拟已到月初
 //        main.queryUserScheme(1);
@@ -523,7 +523,7 @@ public class Main {
         query = session.createQuery(hql);
         List<Object[]> results_schemeCost = query.list();
         int schemeCost = 0;
-        if(results_schemeCost.get(0)[0] != null){
+        if(results_schemeCost.size() > 0 && results_schemeCost.get(0)[0] != null){
             schemeCost = ((Long) results_schemeCost.get(0)[1]).intValue();
         }
         //退订立即生效的套餐也算入套餐月费
@@ -531,8 +531,8 @@ public class Main {
                 +" AND l.operation='退订' AND l.mode='立即生效' GROUP BY l.uid";
         query = session.createQuery(hql);
         List<Object[]> results_schemeCanceledCost = query.list();
-        if(results_schemeCanceledCost.get(0)[0] != null){
-            schemeCost += ((Long) results_schemeCost.get(0)[1]).intValue();
+        if(results_schemeCanceledCost.size() > 0 && results_schemeCanceledCost.get(0)[0] != null){
+            schemeCost += ((Long) results_schemeCanceledCost.get(0)[1]).intValue();
         }
 
         //套餐外消费
@@ -540,7 +540,7 @@ public class Main {
         query = session.createQuery(hql);
         List<Object[]> results_outScheme = query.list();
         double outSchemeCost = 0;
-        if(results_outScheme.get(0)[0] != null){
+        if(results_outScheme.size() > 0 && results_outScheme.get(0)[0] != null){
             outSchemeCost = (Double) results_outScheme.get(0)[1];
         }
 
@@ -551,7 +551,7 @@ public class Main {
         query = session.createQuery(hql);
         List<Object[]> results_phonecall = query.list();
         double phonecallSum = 0;
-        if(results_phonecall.get(0)[0] != null){
+        if(results_phonecall.size() > 0 && results_phonecall.get(0)[0] != null){
             phonecallSum = (Double) results_phonecall.get(0)[1] + (Double) results_phonecall.get(0)[2];
         }
 
@@ -560,7 +560,7 @@ public class Main {
         query = session.createQuery(hql);
         List<Object[]> results_message = query.list();
         double messageSum = 0;
-        if(results_message.get(0)[0] != null){
+        if(results_message.size() > 0 && results_message.get(0)[0] != null){
             messageSum = (Double) results_message.get(0)[1] + (Double) results_message.get(0)[2];
         }
 
@@ -569,7 +569,7 @@ public class Main {
         query = session.createQuery(hql);
         List<Object[]> results_local = query.list();
         double localSum = 0;
-        if(results_local.get(0)[0] != null){
+        if(results_local.size() > 0 && results_local.get(0)[0] != null){
             localSum = (Double) results_local.get(0)[1] + (Double) results_local.get(0)[2];
         }
 
@@ -578,7 +578,7 @@ public class Main {
         query = session.createQuery(hql);
         List<Object[]> results_domestic = query.list();
         double domesticSum = 0;
-        if(results_domestic.get(0)[0] != null){
+        if(results_domestic.size() > 0 && results_domestic.get(0)[0] != null){
             domesticSum = (Double) results_domestic.get(0)[1] + (Double) results_domestic.get(0)[2];
         }
 
