@@ -86,9 +86,10 @@ public class Main {
 //        main.queryMonthBill(1);
 //        main.queryMonthBill(2);
 //        main.queryMonthBill(3);
-        main.queryMonthBill(4);
+//        main.queryMonthBill(4);
 
         //月初，模拟月初时，进行统一处理，如何判断已到月初不做实现(测试不太可行)，这里模拟已到月初
+//        main.queryUserScheme(1);
 //        main.monthBegin();      //该方法的前提为时间到了月初
 //        main.queryUserScheme(1);
 
@@ -145,6 +146,30 @@ public class Main {
             e.printStackTrace();
         }
 
+        //重置用户的套餐
+        try{
+            tx = session.beginTransaction();
+            hql = "FROM SchemeEntity";
+            query = session.createQuery(hql);
+            List<SchemeEntity> schemes = query.list();
+            for(int i = 0; i < schemes.size(); i++){
+                SchemeEntity tempScheme = schemes.get(i);
+                hql = "UPDATE UserschemeEntity SET phonecall= :phonecall, message= :message, local= :local, domestic= :domestic" +
+                        " WHERE sid=:sid";
+                query = session.createQuery(hql);
+                query.setParameter("phonecall", tempScheme.getPhonecall());
+                query.setParameter("message", tempScheme.getMessage());
+                query.setParameter("local", tempScheme.getLocal());
+                query.setParameter("domestic", tempScheme.getDomestic());
+                query.setParameter("sid", tempScheme.getSid());
+                query.executeUpdate();
+            }
+            tx.commit();
+        }catch (HibernateException e) {
+            if (tx!=null) tx.rollback();
+            e.printStackTrace();
+        }
+
         //为用户扣除月费
         hql = "SELECT us.uid, SUM(s.cost) FROM UserschemeEntity AS us, SchemeEntity AS s WHERE us.sid=s.sid GROUP BY us.uid";    //表连接获取套餐的月费
         query = session.createQuery(hql);
@@ -155,6 +180,7 @@ public class Main {
             updateUserBalance(uid, -costSum);        //扣除月费
         }
 
+        session.close();
         System.out.println("月初处理结束");
 
         long time2 = System.currentTimeMillis();
